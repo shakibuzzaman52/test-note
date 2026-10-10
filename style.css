@@ -14,8 +14,8 @@
   --text-subtle: #8A847A;
   --text-disabled: #B8B0A5;
 
-  --brand-primary: #0A37F5;
-  --brand-primary-hover: #072CC4;
+  --brand-primary: #181716;
+  --brand-primary-hover: #2B2A28;
   --brand-dark: #181716;
   --brand-dark-hover: #2B2A28;
   --brand-danger: #DC2626;
@@ -329,33 +329,6 @@ button, input {
   color: var(--text-main);
 }
 
-.nav-social-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-left: 0.25rem;
-  flex-shrink: 0;
-}
-
-.social-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background-color: var(--bg-subtle);
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.social-icon-btn:hover {
-  background-color: var(--bg-hover);
-  color: var(--brand-primary);
-}
-
 .header-menu-toggle {
   display: none;
   padding: 0.25rem 0.5rem;
@@ -625,7 +598,7 @@ button, input {
 }
 
 .file-progress-bar.is-animated {
-  background: linear-gradient(90deg, var(--brand-primary) 0%, #3B82F6 50%, var(--brand-primary) 100%);
+  background: linear-gradient(90deg, var(--brand-primary) 0%, #3C3833 50%, var(--brand-primary) 100%);
   background-size: 200% 100%;
   animation: progressShimmer 1.5s infinite linear;
 }
@@ -1046,19 +1019,14 @@ button, input {
   border-color: var(--border-hover);
 }
 
-.calendar-cell--today .calendar-cell-btn {
+.calendar-cell.has-notes .calendar-cell-btn {
   border: 2px solid var(--text-main);
   font-weight: 700;
 }
 
-.calendar-cell.has-notes .calendar-cell-btn {
-  border: 2px solid var(--brand-primary);
-  color: var(--brand-primary);
-  font-weight: 700;
-}
-
 .calendar-cell.has-notes .calendar-cell-btn:hover:not(:disabled) {
-  border-color: var(--brand-primary-hover);
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 .calendar-cell--disabled .calendar-cell-btn {
@@ -1723,13 +1691,6 @@ button, input {
     margin-top: 1rem;
     padding: 0.85rem 1.25rem;
     font-size: 0.95rem;
-  }
-
-  .header-nav .nav-social-links {
-    margin-top: auto;
-    width: 100%;
-    padding-top: 1.25rem;
-    gap: 0.85rem;
   }
 
   .hero {
