@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassNotes — Organized Lecture Notes</title>
+  <meta name="description" content="Find class notes and academic resources organized by department, section, course and date.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Preloader -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-brand">
+      <span class="preloader-char" style="--char-index: 0">C</span>
+      <span class="preloader-char" style="--char-index: 1">l</span>
+      <span class="preloader-char" style="--char-index: 2">a</span>
+      <span class="preloader-char" style="--char-index: 3">s</span>
+      <span class="preloader-char" style="--char-index: 4">s</span>
+      <span class="preloader-char" style="--char-index: 5">N</span>
+      <span class="preloader-char" style="--char-index: 6">o</span>
+      <span class="preloader-char" style="--char-index: 7">t</span>
+      <span class="preloader-char" style="--char-index: 8">e</span>
+      <span class="preloader-char" style="--char-index: 9">s</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <h1 class="brand-mark">ClassNotes<sup>®</sup></h1>
+
+    <button type="button" class="header-menu-toggle" id="mobile-menu-toggle" aria-expanded="false" aria-controls="header-nav">Menu</button>
+
+    <nav class="header-nav" id="header-nav">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how-to-find" class="nav-link">How to Find</a>
+      <a href="#how-to-upload" class="nav-link">How to Upload</a>
+      <button type="button" class="btn btn--primary" id="trigger-add-note"><span class="btn-plus">+</span>Add Note</button>
+
+      <div class="nav-social-links">
+        <a href="https://github.com/shakibuzzaman52" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="GitHub Profile" title="GitHub">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+        </a>
+        <a href="https://linkedin.com/in/shakibuzzaman52" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="LinkedIn Profile" title="LinkedIn">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c0-.9-.73-1.63-1.63-1.63z"/>
+          </svg>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="shell">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h2 class="hero-title">Lecture archive &amp;<br><span class="badge">class notes</span></h2>
+      <p class="hero-desc">Find class notes and academic resources organized by department, section, course and date.</p>
+
+      <div class="selection-banner-wrapper">
+        <div id="selection-banner" class="selection-banner"></div>
+      </div>
+    </section>
+
+    <!-- Filters Navigation -->
+    <nav class="nav-filters" id="main-nav-filters" aria-label="Class and Lecture Filters">
+      <div class="nav-filter-item" data-filter="dept">
+        <button type="button" class="nav-filter-trigger" id="dept-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="nav-filter-text" id="dept-label">Department</span>
+          <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+            <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-filter-menu" id="dept-menu" hidden role="listbox"></div>
+      </div>
+
+      <div class="nav-filter-item" data-filter="sec">
+        <button type="button" class="nav-filter-trigger" id="sec-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="nav-filter-text" id="sec-label">Section</span>
+          <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+            <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-filter-menu" id="sec-menu" hidden role="listbox"></div>
+      </div>
+
+      <div class="nav-filter-item" data-filter="course">
+        <button type="button" class="nav-filter-trigger" id="course-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="nav-filter-text" id="course-label">Course</span>
+          <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+            <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-filter-menu" id="course-menu" hidden role="listbox"></div>
+      </div>
+
+      <div class="nav-filter-item" data-filter="topic">
+        <button type="button" class="nav-filter-trigger" id="topic-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="nav-filter-text" id="topic-label">Topic</span>
+          <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+            <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-filter-menu" id="topic-menu" hidden role="listbox"></div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content-area">
+      <!-- Calendar View -->
+      <section id="calendar-view">
+        <div class="calendar-nav">
+          <h2 class="calendar-nav-title" id="calendar-header-title"></h2>
+          <div class="calendar-nav-actions">
+            <button type="button" class="btn btn--subtle" id="cal-prev" aria-label="Previous Month">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13L5 8L10 3"/>
+              </svg>
+              <span>Prev</span>
+            </button>
+            <button type="button" class="btn btn--dark" id="cal-today">Today</button>
+            <button type="button" class="btn btn--subtle" id="cal-next" aria-label="Next Month">
+              <span>Next</span>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 3L11 8L6 13"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-carousel" id="calendar-carousel">
+          <div class="calendar-track" id="calendar-track">
+            <div class="calendar-panel" id="panel-prev" aria-hidden="true">
+              <table class="calendar-grid">
+                <thead>
+                  <tr>
+                    <th scope="col">Sun</th>
+                    <th scope="col">Mon</th>
+                    <th scope="col">Tue</th>
+                    <th scope="col">Wed</th>
+                    <th scope="col">Thu</th>
+                    <th scope="col">Fri</th>
+                    <th scope="col">Sat</th>
+                  </tr>
+                </thead>
+                <tbody id="calendar-cells-prev"></tbody>
+              </table>
+            </div>
+
+            <div class="calendar-panel is-current" id="panel-curr">
+              <table class="calendar-grid">
+                <thead>
+                  <tr>
+                    <th scope="col">Sun</th>
+                    <th scope="col">Mon</th>
+                    <th scope="col">Tue</th>
+                    <th scope="col">Wed</th>
+                    <th scope="col">Thu</th>
+                    <th scope="col">Fri</th>
+                    <th scope="col">Sat</th>
+                  </tr>
+                </thead>
+                <tbody id="calendar-cells"></tbody>
+              </table>
+            </div>
+
+            <div class="calendar-panel" id="panel-next" aria-hidden="true">
+              <table class="calendar-grid">
+                <thead>
+                  <tr>
+                    <th scope="col">Sun</th>
+                    <th scope="col">Mon</th>
+                    <th scope="col">Tue</th>
+                    <th scope="col">Wed</th>
+                    <th scope="col">Thu</th>
+                    <th scope="col">Fri</th>
+                    <th scope="col">Sat</th>
+                  </tr>
+                </thead>
+                <tbody id="calendar-cells-next"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Course Dates Cards View -->
+      <section class="course-dates-view" id="course-view" hidden>
+        <div class="course-dates-header">
+          <h3 class="course-dates-title" id="course-view-title"></h3>
+          <span class="course-dates-count" id="course-view-count"></span>
+        </div>
+        <div class="course-dates-grid" id="course-dates-list"></div>
+      </section>
+    </main>
+
+    <!-- Documentation & Information Sections -->
+    <section class="docs-container" id="documentation" aria-label="Documentation and Guides">
+      <div class="docs-intro">
+        <h2 class="docs-main-title">Explore ClassNotes</h2>
+        <p class="docs-lead">Find lecture notes, browse study materials, and contribute resources to help your classmates.</p>
+      </div>
+
+      <div class="docs-grid">
+        <article class="docs-block" id="features">
+          <h3 class="docs-block-title">Features</h3>
+          <ul class="docs-list">
+            <li class="docs-list-item"><strong>Department &amp; Section Filter:</strong> Find notes specific to your department and section.</li>
+            <li class="docs-list-item"><strong>Course &amp; Topic Filter:</strong> Browse notes by course and topic.</li>
+            <li class="docs-list-item"><strong>Interactive Calendar:</strong> Find notes by selecting a specific date.</li>
+            <li class="docs-list-item"><strong>Direct Upload &amp; Link Sharing:</strong> Upload lecture slides and PDFs directly (up to 10MB) or share links to Drive, Notion, and other cloud storages.</li>
+            <li class="docs-list-item"><strong>Share Notes:</strong> Share useful study resources with your classmates.</li>
+            <li class="docs-list-item"><strong>Report Notes:</strong> Report notes that are incorrect, broken, or inappropriate.</li>
+            <li class="docs-list-item"><strong>Community Contributions:</strong> Upload your own notes and help classmates access useful study materials.</li>
+            <li class="docs-list-item"><strong>Simple Interface:</strong> Easily navigate and access shared resources.</li>
+          </ul>
+        </article>
+
+        <article class="docs-block" id="how-to-find">
+          <h3 class="docs-block-title">How to Find Notes</h3>
+          <ol class="docs-steps">
+            <li class="docs-step-item">Select your Department.</li>
+            <li class="docs-step-item">Choose your Section.</li>
+            <li class="docs-step-item">Select a Course to find relevant notes.</li>
+            <li class="docs-step-item">Choose a Topic if needed.</li>
+            <li class="docs-step-item">Use the calendar to select a date and view available notes.</li>
+            <li class="docs-step-item">Click a note title to open the shared resource.</li>
+            <li class="docs-step-item">Use the available Share option to share a note with others.</li>
+            <li class="docs-step-item">If you find a broken, incorrect, or inappropriate note, use the Report option.</li>
+          </ol>
+        </article>
+      </div>
+
+      <article class="docs-block" id="how-to-upload">
+        <h3 class="docs-block-title">How to Upload Notes</h3>
+        <ol class="docs-steps">
+          <li class="docs-step-item">Click the <strong>Add Note</strong> button.</li>
+          <li class="docs-step-item">Select your <strong>Department</strong> and <strong>Section</strong>.</li>
+          <li class="docs-step-item">Choose the class date.</li>
+          <li class="docs-step-item">Select the relevant <strong>Course</strong>.</li>
+          <li class="docs-step-item">Enter the <strong>Topic Name</strong> and <strong>Note Title</strong>.</li>
+          <li class="docs-step-item">Choose whether to <strong>Upload File</strong> directly (Max 10MB) or provide a <strong>Web Link</strong> (Google Drive, Notion, OneDrive, etc.).</li>
+          <li class="docs-step-item">Submit the note.</li>
+        </ol>
+
+        <h4 class="docs-subheading">Before submitting:</h4>
+        <ul class="docs-list">
+          <li class="docs-list-item">Make sure all information is accurate.</li>
+          <li class="docs-list-item">Use a clear and descriptive title.</li>
+          <li class="docs-list-item">Supported file formats: PDF, DOC, DOCX, PPT, PPTX, PNG, JPG (Max 10MB).</li>
+          <li class="docs-list-item">If providing a web link, ensure the resource permissions are set to public view.</li>
+          <li class="docs-list-item">Upload only relevant academic study materials.</li>
+        </ul>
+
+        <div class="docs-notice">
+          Submitted notes require admin review and approval before appearing on the website.
+        </div>
+      </article>
+
+      <div class="docs-contact-box" id="contact-request">
+        <h3>Need a New Department, Section, or Course?</h3>
+        <p>If your department, section, or course is not available in the dropdown menu, please <a href="mailto:263-15-184@diu.edu.com">email us</a> to request its addition.</p>
+      </div>
+    </section>
+
+    <!-- Modal: View Notes -->
+    <dialog class="dialog-modal bottom-sheet" id="notes-modal">
+      <div class="bottom-sheet-handle-wrapper" title="Drag down to close">
+        <div class="bottom-sheet-handle"></div>
+      </div>
+
+      <div class="dialog-modal-header">
+        <h3 class="dialog-modal-title" id="modal-date-label"></h3>
+        <span class="dialog-modal-desc" id="modal-notes-total"></span>
+      </div>
+
+      <div class="notes-stack" id="modal-notes-stack"></div>
+
+      <div class="dialog-modal-actions">
+        <button type="button" class="btn btn--ghost" data-close-modal>Close</button>
+      </div>
+    </dialog>
+
+    <!-- Modal: Add Note -->
+    <dialog class="dialog-modal bottom-sheet" id="add-modal">
+      <div class="bottom-sheet-handle-wrapper" title="Drag down to close">
+        <div class="bottom-sheet-handle"></div>
+      </div>
+
+      <form id="add-note-form">
+        <div class="dialog-modal-header">
+          <h3 class="dialog-modal-title">Add Class Note</h3>
+          <span class="dialog-modal-desc">Share lecture slides, handouts, and notes</span>
+        </div>
+
+        <div class="modal-body-scroll">
+          <div class="field">
+            <label for="form-dept-trigger">Department:</label>
+            <div class="nav-filter-item" data-field="dept">
+              <button type="button" class="nav-filter-trigger" id="form-dept-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="nav-filter-text" id="form-dept-label">Department</span>
+                <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+                  <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="nav-filter-menu" id="form-dept-menu" hidden role="listbox"></div>
+              <input type="hidden" id="input-dept" name="department" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="form-sec-trigger">Section:</label>
+            <div class="nav-filter-item" data-field="sec">
+              <button type="button" class="nav-filter-trigger" id="form-sec-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="nav-filter-text" id="form-sec-label">Section</span>
+                <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+                  <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="nav-filter-menu" id="form-sec-menu" hidden role="listbox"></div>
+              <input type="hidden" id="input-section" name="section" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="input-date">Date:</label>
+            <input type="date" id="input-date" required>
+          </div>
+
+          <div class="field">
+            <label for="form-course-trigger">Course:</label>
+            <div class="nav-filter-item" data-field="course">
+              <button type="button" class="nav-filter-trigger" id="form-course-trigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="nav-filter-text" id="form-course-label">Course</span>
+                <svg class="nav-filter-arrow" width="11.5" height="7" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+                  <path d="M1.75 2.25L6 6.25L10.25 2.25" stroke="currentColor" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="nav-filter-menu" id="form-course-menu" hidden role="listbox"></div>
+              <input type="hidden" id="input-course" name="course" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="input-topic">Topic:</label>
+            <input type="text" id="input-topic" placeholder="e.g. Graph Traversal Algorithms" required>
+          </div>
+
+          <div class="field">
+            <label for="input-title">Title:</label>
+            <input type="text" id="input-title" placeholder="e.g. Lecture Slide 12" required>
+          </div>
+
+          <!-- Mode Toggle: File Upload vs Web Link -->
+          <div class="field">
+            <label>Upload Type:</label>
+            <div class="resource-type-toggle">
+              <button type="button" class="toggle-tab is-active" id="tab-mode-file" data-mode="file">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Upload File</span>
+              </button>
+              <button type="button" class="toggle-tab" id="tab-mode-link" data-mode="link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                <span>Web Link</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Option 1: Direct File Upload -->
+          <div class="field" id="field-file-upload">
+            <label for="input-file">Lecture File / Document:</label>
+            <div class="file-dropzone" id="file-dropzone">
+              <input type="file" id="input-file" class="file-input-hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg">
+              
+              <div class="file-dropzone-content" id="file-dropzone-content">
+                <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div class="file-prompt-text">
+                  <span class="file-prompt-action">Choose a file</span> or drag &amp; drop
+                </div>
+                <span class="file-limit-text">PDF, DOC, PPT or Images (Max 10MB)</span>
+              </div>
+
+              <!-- Selected File Box with Progress Bar -->
+              <div class="file-selected-box" id="file-selected-box" hidden>
+                <div class="file-selected-main">
+                  <div class="file-selected-left">
+                    <svg class="file-selected-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <div class="file-selected-meta">
+                      <span class="file-selected-name" id="selected-file-name">filename.pdf</span>
+                      <div class="file-selected-subinfo">
+                        <span class="file-selected-size" id="selected-file-size">0 KB</span>
+                        <span class="file-selected-status" id="selected-file-status"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="file-selected-right">
+                    <span class="file-progress-percent" id="file-progress-percent">0%</span>
+                    <button type="button" class="btn-remove-file" id="btn-remove-file" aria-label="Remove selected file" title="Remove file">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="file-progress-container" id="file-progress-container">
+                  <div class="file-progress-bar" id="file-progress-bar" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option 2: Web / External Link -->
+          <div class="field" id="field-link-upload" hidden>
+            <label for="input-link">Resource URL:</label>
+            <input type="text" id="input-link" inputmode="url" placeholder="https://... (Drive, Notion, OneDrive, Dropbox, etc.)">
+          </div>
+        </div>
+
+        <div class="dialog-modal-actions">
+          <button type="button" class="btn btn--ghost" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn--primary" id="btn-submit-note">Submit Note</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Modal: Report Link -->
+    <dialog class="dialog-modal bottom-sheet" id="report-modal">
+      <div class="bottom-sheet-handle-wrapper" title="Drag down to close">
+        <div class="bottom-sheet-handle"></div>
+      </div>
+
+      <form id="report-link-form">
+        <div class="dialog-modal-header">
+          <h3 class="dialog-modal-title">Report Broken Link</h3>
+          <span class="dialog-modal-desc">Notify classmates about broken links</span>
+        </div>
+
+        <div class="modal-body-scroll">
+          <p class="field">
+            <strong>Resource:</strong> <span id="report-note-title"></span><br>
+            <small id="report-note-context" class="dialog-modal-desc"></small>
+          </p>
+          <p class="field dialog-modal-text">
+            Flagging this note notifies section classmates that the link is expired or inaccessible.
+          </p>
+        </div>
+
+        <div class="dialog-modal-actions">
+          <button type="button" class="btn btn--ghost" data-close-modal>Cancel</button>
+          <button type="submit" class="btn btn--danger" id="btn-submit-report">Report Link</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+  <!-- Toast Notification Tray -->
+  <div class="toast-tray" id="toast-tray" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
