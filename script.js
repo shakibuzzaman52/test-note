@@ -9,8 +9,6 @@
     ALLOWED_EXTENSIONS: ["pdf", "doc", "docx", "ppt", "pptx", "png", "jpg", "jpeg"]
   };
 
-  const CHECK_SVG = '<svg class="nav-filter-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
   const config = window.APP_CONFIG || {};
   const departments = Array.isArray(config.departments) ? config.departments : [];
 
@@ -184,6 +182,21 @@
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  function formatViewCount(num) {
+    const n = Math.max(0, parseInt(num, 10) || 0);
+    if (n < 1000) return String(n);
+    if (n < 1000000) {
+      const k = (n / 1000).toFixed(1).replace(/\.0$/, "");
+      return `${k}K`;
+    }
+    if (n < 1000000000) {
+      const m = (n / 1000000).toFixed(1).replace(/\.0$/, "");
+      return `${m}M`;
+    }
+    const b = (n / 1000000000).toFixed(1).replace(/\.0$/, "");
+    return `${b}B`;
+  }
+
   const pluralize = (count, s, p) => `${count} ${count === 1 ? s : p}`;
 
   function escapeHtml(text) {
@@ -212,6 +225,28 @@
     } catch {
       return "";
     }
+  }
+
+  function refreshAutoSlideElements() {
+    requestAnimationFrame(() => {
+      document.querySelectorAll(".auto-slide-container").forEach(container => {
+        const inner = container.querySelector(".auto-slide-text, .nav-filter-text-inner, .course-dates-title-inner, .file-selected-name");
+        if (!inner) return;
+
+        container.classList.remove("is-overflowing");
+        inner.style.removeProperty("--slide-dist");
+        inner.style.removeProperty("--slide-duration");
+
+        const overflow = inner.scrollWidth - container.clientWidth;
+        if (overflow > 5) {
+          container.classList.add("is-overflowing");
+          inner.classList.add("auto-slide-text");
+          inner.style.setProperty("--slide-dist", `-${overflow + 6}px`);
+          const duration = Math.min(14, Math.max(4.5, (overflow / 20)));
+          inner.style.setProperty("--slide-duration", `${duration}s`);
+        }
+      });
+    });
   }
 
   function injectHoneypot(form) {
@@ -346,6 +381,7 @@
     if (ui.fileProgressContainer) ui.fileProgressContainer.hidden = true;
 
     updateProgressUI(0, "Ready to upload");
+    refreshAutoSlideElements();
   }
 
   function clearSelectedFile() {
@@ -450,20 +486,20 @@
   function recordNoteView(row) {
     if (!row) return;
 
-    const countEls = ui.modalNotesStack.querySelectorAll(`.view-count-num[data-row="${row}"]`);
-    countEls.forEach(el => {
-      const cur = parseInt(el.textContent, 10) || 0;
-      el.textContent = String(cur + 1);
-      const parentBadge = el.closest(".note-view-badge");
-      if (parentBadge) parentBadge.title = `${cur + 1} views`;
-    });
-
     const targetNote = state.notes.find(n => String(n.row) === String(row));
+    const newCount = targetNote ? (targetNote.viewCount || 0) + 1 : 1;
     if (targetNote) {
-      targetNote.viewCount = (targetNote.viewCount || 0) + 1;
+      targetNote.viewCount = newCount;
       const cacheKey = `notes_${state.dept}_${state.sec}`;
       safeStorage.set(cacheKey, JSON.stringify(state.notes));
     }
+
+    const countEls = ui.modalNotesStack.querySelectorAll(`.view-count-num[data-row="${row}"]`);
+    countEls.forEach(el => {
+      el.textContent = formatViewCount(newCount);
+      const parentBadge = el.closest(".note-view-badge");
+      if (parentBadge) parentBadge.title = `${newCount} ${newCount === 1 ? 'view' : 'views'}`;
+    });
 
     syncData({ type: "view", row: row });
   }
@@ -570,17 +606,18 @@
       items.push({ val: String(item), text: prefix ? `${prefix} ${item}` : String(item) });
     }
 
-    container.innerHTML = items.map(({ val, text }) => {
+    const optionsHtml = items.map(({ val, text }) => {
       const isSel = selectedVal === val;
       return `<button type="button" class="nav-filter-option ${isSel ? 'is-selected' : ''}" data-value="${escapeHtml(val)}" role="option" aria-selected="${isSel}">
         <span class="nav-filter-option-text">${escapeHtml(text)}</span>
-        ${isSel ? CHECK_SVG : ''}
       </button>`;
     }).join("");
+
+    container.innerHTML = `<div class="nav-filter-menu-list">${optionsHtml}</div>`;
   }
 
   function renderMenuNotice(container, message) {
-    container.innerHTML = `<div class="nav-filter-empty">${escapeHtml(message)}</div>`;
+    container.innerHTML = `<div class="nav-filter-menu-list"><div class="nav-filter-empty">${escapeHtml(message)}</div></div>`;
   }
 
   function closeAllMenus() {
@@ -604,11 +641,20 @@
       if (trigger.closest("#main-nav-filters")) {
         const rect = trigger.getBoundingClientRect();
         menu.style.position = "fixed";
-        menu.style.top = `${rect.bottom + 5}px`;
-        const menuWidth = Math.min(280, Math.max(210, rect.width), Math.max(100, window.innerWidth - 32));
+        menu.style.top = `${rect.bottom + 10}px`;
+        const menuWidth = Math.min(290, Math.max(220, rect.width), Math.max(100, window.innerWidth - 32));
         const left = Math.min(rect.left, window.innerWidth - 16 - menuWidth);
-        menu.style.left = `${Math.max(16, left)}px`;
+        const computedLeft = Math.max(16, left);
+        menu.style.left = `${computedLeft}px`;
         menu.style.width = `${menuWidth}px`;
+
+        const triggerCenter = rect.left + (rect.width / 2);
+        const arrowLeft = Math.max(22, Math.min(menuWidth - 22, triggerCenter - computedLeft));
+        menu.style.setProperty("--arrow-left", `${arrowLeft}px`);
+      } else {
+        const triggerWidth = trigger.offsetWidth;
+        const arrowLeft = Math.max(24, Math.min(triggerWidth - 24, triggerWidth / 2));
+        menu.style.setProperty("--arrow-left", `${arrowLeft}px`);
       }
     }
   }
@@ -616,8 +662,9 @@
   function updateFilterLabels() {
     ui.deptLabel.textContent = state.dept || "Department";
     ui.secLabel.textContent = state.sec ? `Sec ${state.sec}` : "Section";
-    ui.courseLabel.textContent = state.sec ? (state.course === "ALL" ? "All Courses" : state.course) : "Course";
-    ui.topicLabel.textContent = state.sec ? (state.topic === "ALL" ? "All Topics" : state.topic) : "Topic";
+    ui.courseLabel.textContent = (state.dept && state.sec) ? (state.course === "ALL" ? "All Courses" : state.course) : "Course";
+    ui.topicLabel.textContent = (state.dept && state.sec) ? (state.topic === "ALL" ? "All Topics" : state.topic) : "Topic";
+    refreshAutoSlideElements();
   }
 
   function updateSelectionBanner() {
@@ -632,8 +679,13 @@
   }
 
   function syncTopicMenu() {
-    if (!state.dept || !state.sec) {
-      renderMenuNotice(ui.topicMenu, "Select Department & Section first");
+    if (!state.dept) {
+      renderMenuNotice(ui.topicMenu, "Please select Department first");
+      return;
+    }
+
+    if (!state.sec) {
+      renderMenuNotice(ui.topicMenu, "Please select Section first");
       return;
     }
 
@@ -656,7 +708,12 @@
 
     if (activeDept) {
       renderMenuOptions(ui.secMenu, activeDept.sections, state.sec || null, false, "", "Sec");
-      renderMenuOptions(ui.courseMenu, activeDept.courses, state.sec ? state.course : "ALL", true, "All Courses");
+
+      if (state.sec) {
+        renderMenuOptions(ui.courseMenu, activeDept.courses, state.course, true, "All Courses");
+      } else {
+        renderMenuNotice(ui.courseMenu, "Please select Section first");
+      }
     } else {
       renderMenuNotice(ui.secMenu, "Please select Department first");
       renderMenuNotice(ui.courseMenu, "Please select Department first");
@@ -664,35 +721,92 @@
     syncTopicMenu();
   }
 
+  function getNotesListForDeptSec(dept, sec) {
+    if (state.dept === dept && state.sec === sec && Array.isArray(state.notes)) {
+      return state.notes;
+    }
+    try {
+      const cached = JSON.parse(safeStorage.get(`notes_${dept}_${sec}`) || "null");
+      if (Array.isArray(cached)) {
+        return cached.map(n => normalizeNote(n, dept, sec));
+      }
+    } catch {}
+    return [];
+  }
+
   function updateModalDropdowns(deptCode, secCode, courseCode) {
-    const dept = getDeptMeta(deptCode) || departments[0] || { code: "", sections: [], courses: [] };
-    ui.formDept.value = dept.code;
-    ui.formDeptLabel.textContent = dept.code || "Department";
-    renderMenuOptions(ui.formDeptMenu, departments.map(d => d.code), dept.code);
+    const dept = getDeptMeta(deptCode);
 
-    const sec = (dept.sections.includes(secCode) ? secCode : dept.sections[0]) || "";
-    ui.formSec.value = sec;
-    ui.formSecLabel.textContent = sec ? `Sec ${sec}` : "Section";
-    renderMenuOptions(ui.formSecMenu, dept.sections, sec, false, "", "Sec");
+    if (dept) {
+      ui.formDept.value = dept.code;
+      ui.formDeptLabel.textContent = dept.code;
+      renderMenuOptions(ui.formDeptMenu, departments.map(d => d.code), dept.code);
 
-    const course = (dept.courses.includes(courseCode) ? courseCode : dept.courses[0]) || "";
-    ui.formCourse.value = course;
-    ui.formCourseLabel.textContent = course || "Course";
-    renderMenuOptions(ui.formCourseMenu, dept.courses, course);
+      const sec = (dept.sections.includes(secCode) ? secCode : "") || "";
+      ui.formSec.value = sec;
+      ui.formSecLabel.textContent = sec ? `Sec ${sec}` : "Section";
+      renderMenuOptions(ui.formSecMenu, dept.sections, sec, false, "", "Sec");
+
+      if (sec) {
+        const course = (dept.courses.includes(courseCode) ? courseCode : "") || "";
+        ui.formCourse.value = course;
+        ui.formCourseLabel.textContent = course || "Course";
+        renderMenuOptions(ui.formCourseMenu, dept.courses, course);
+      } else {
+        ui.formCourse.value = "";
+        ui.formCourseLabel.textContent = "Course";
+        renderMenuNotice(ui.formCourseMenu, "Please select Section first");
+      }
+    } else {
+      ui.formDept.value = "";
+      ui.formDeptLabel.textContent = "Department";
+      renderMenuOptions(ui.formDeptMenu, departments.map(d => d.code), "");
+
+      ui.formSec.value = "";
+      ui.formSecLabel.textContent = "Section";
+      renderMenuNotice(ui.formSecMenu, "Please select Department first");
+
+      ui.formCourse.value = "";
+      ui.formCourseLabel.textContent = "Course";
+      renderMenuNotice(ui.formCourseMenu, "Please select Department first");
+    }
 
     calculateDefaultTitle();
+    refreshAutoSlideElements();
   }
 
   function calculateDefaultTitle() {
     if (state.manualTitleEdited) return;
-    const targetDate = ui.formDate.value || state.activeDate || formatDateKey(new Date());
-    const count = state.notes.filter(n =>
-      n.department === ui.formDept.value &&
-      n.section === ui.formSec.value &&
+
+    const targetDate = ui.formDate?.value || "";
+    const deptVal = ui.formDept?.value || "";
+    const secVal = ui.formSec?.value || "";
+    const courseVal = ui.formCourse?.value || "";
+
+    if (!targetDate || !deptVal || !secVal) {
+      if (ui.formTitle) ui.formTitle.value = "Hand Note 1";
+      return;
+    }
+
+    const notesPool = getNotesListForDeptSec(deptVal, secVal);
+    const matchingNotes = notesPool.filter(n =>
+      n.department === deptVal &&
+      n.section === secVal &&
       n.date === targetDate &&
-      (!ui.formCourse.value || n.course === ui.formCourse.value)
-    ).length;
-    ui.formTitle.value = `Note ${count + 1}`;
+      (!courseVal || n.course === courseVal)
+    );
+
+    const handNoteNumbers = matchingNotes
+      .map(n => {
+        const match = String(n.title || "").trim().match(/^Hand Note\s+(\d+)$/i);
+        return match ? parseInt(match[1], 10) : null;
+      })
+      .filter(num => num !== null && !isNaN(num));
+
+    const nextNum = handNoteNumbers.length > 0 ? Math.max(...handNoteNumbers) + 1 : 1;
+    if (ui.formTitle) {
+      ui.formTitle.value = `Hand Note ${nextNum}`;
+    }
   }
 
   function checkBodyScrollLock() {
@@ -710,7 +824,10 @@
     document.body.classList.add("sheet-open");
     modalEl.style.transform = "";
     if (!modalEl.open) modalEl.showModal();
-    requestAnimationFrame(() => modalEl.classList.add("is-open"));
+    requestAnimationFrame(() => {
+      modalEl.classList.add("is-open");
+      refreshAutoSlideElements();
+    });
   }
 
   function closeSheetModal(modalEl, onClosed) {
@@ -1135,15 +1252,24 @@
 
     ui.courseDatesList.innerHTML = uniqueDates.map(dateStr => {
       const dateObj = parseLocalDate(dateStr);
+      const dateNotes = filtered.filter(n => n.date === dateStr);
+      const topicsForDate = [...new Set(dateNotes.map(n => (n.topic || "").trim()).filter(Boolean))];
+      const topicText = state.topic !== "ALL" ? state.topic : (topicsForDate.length > 0 ? topicsForDate.join(" • ") : "");
+
       return `
         <div class="course-card" data-date="${escapeHtml(dateStr)}">
           <div class="course-card-info">
-            <span class="course-card-date">${formatReadableDate(dateStr)}</span>
-            <span class="course-card-day">${DAY_NAMES[dateObj.getDay()] || ""}</span>
+            <div class="course-card-header-row">
+              <span class="course-card-date">${formatReadableDate(dateStr)}</span>
+              <span class="course-card-day">${DAY_NAMES[dateObj.getDay()] || ""}</span>
+            </div>
+            ${topicText ? `<div class="auto-slide-container" title="${escapeHtml(topicText)}"><span class="course-card-topic auto-slide-text">${escapeHtml(topicText)}</span></div>` : ""}
           </div>
           <span class="course-card-badge">${pluralize(notesCountMap[dateStr] || 0, 'note', 'notes')}</span>
         </div>`;
     }).join("");
+
+    refreshAutoSlideElements();
   }
 
   function renderModalNotes() {
@@ -1186,7 +1312,9 @@
               <line x1="16" y1="17" x2="8" y2="17"></line>
               <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-            <span class="note-title-text">${title}</span>`;
+            <div class="note-title-wrap auto-slide-container">
+              <span class="note-title-text auto-slide-text">${title}</span>
+            </div>`;
 
           const titleEl = hasLink
             ? `<a href="${escapedLink}" target="_blank" rel="noopener noreferrer" class="note-title-btn" data-row="${escapeHtml(item.row ?? "")}" title="${title}">${titleBody}</a>`
@@ -1199,7 +1327,7 @@
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <span class="view-count-num" data-row="${escapeHtml(item.row ?? "")}">${viewCount}</span>
+                <span class="view-count-num" data-row="${escapeHtml(item.row ?? "")}">${formatViewCount(viewCount)}</span>
               </span>
               ${hasLink ? `
               <button type="button" class="btn-share" data-title="${title}" data-link="${escapedLink}" data-course="${escapeHtml(course)}" aria-label="Share note link" title="Share">
@@ -1233,6 +1361,7 @@
       output += `</div>`;
     }
     ui.modalNotesStack.innerHTML = output;
+    refreshAutoSlideElements();
   }
 
   function render() {
@@ -1248,6 +1377,7 @@
     } else {
       renderCourseDates();
     }
+    refreshAutoSlideElements();
   }
 
   function onFilterSelect(key, val) {
@@ -1264,9 +1394,11 @@
       safeStorage.set("selected_sec", val);
       loadNotes();
     } else if (key === "course") {
+      if (!state.dept || !state.sec) return;
       state.course = val;
       state.topic = "ALL";
     } else if (key === "topic") {
+      if (!state.dept || !state.sec) return;
       state.topic = val;
     }
     closeAllMenus();
@@ -1299,7 +1431,10 @@
 
     if (ui.navFilters) ui.navFilters.addEventListener("scroll", closeAllMenus, { passive: true });
     window.addEventListener("scroll", closeAllMenus, { passive: true });
-    window.addEventListener("resize", closeAllMenus, { passive: true });
+    window.addEventListener("resize", () => {
+      closeAllMenus();
+      refreshAutoSlideElements();
+    }, { passive: true });
 
     ui.navFilters.addEventListener("click", (e) => {
       const trigger = e.target.closest(".nav-filter-trigger");
@@ -1321,11 +1456,24 @@
       if (opt?.dataset.value) {
         const val = opt.dataset.value;
         const field = opt.closest(".nav-filter-item").dataset.field;
-        updateModalDropdowns(
-          field === "dept" ? val : ui.formDept.value,
-          field === "sec" ? val : ui.formSec.value,
-          field === "course" ? val : ui.formCourse.value
-        );
+
+        let nextDept = ui.formDept.value;
+        let nextSec = ui.formSec.value;
+        let nextCourse = ui.formCourse.value;
+
+        if (field === "dept") {
+          nextDept = val;
+          nextSec = "";
+          nextCourse = "";
+        } else if (field === "sec") {
+          nextSec = val;
+          nextCourse = "";
+        } else if (field === "course") {
+          if (!nextDept || !nextSec) return;
+          nextCourse = val;
+        }
+
+        updateModalDropdowns(nextDept, nextSec, nextCourse);
         closeAllMenus();
       }
     });
@@ -1439,11 +1587,18 @@
       clearSelectedFile();
       if (ui.formLink) ui.formLink.value = "";
       setUploadMode("file");
+
       const todayDate = formatDateKey(new Date());
       ui.formDate.max = todayDate;
-      ui.formDate.value = (state.activeDate && state.activeDate <= todayDate) ? state.activeDate : todayDate;
-      ui.formTopic.value = (state.topic !== "ALL") ? state.topic : "";
-      updateModalDropdowns(state.dept, state.sec, state.course !== "ALL" ? state.course : "");
+      ui.formDate.value = "";
+
+      ui.formTopic.value = "";
+
+      const deptToSet = state.dept ? state.dept : "";
+      const secToSet = (state.dept && state.sec) ? state.sec : "";
+      const courseToSet = "";
+
+      updateModalDropdowns(deptToSet, secToSet, courseToSet);
       openSheetModal(ui.addModal);
     });
 
@@ -1459,6 +1614,26 @@
       if (botCheck && botCheck.value.trim() !== "") {
         closeSheetModal(ui.addModal);
         showToast("Submission rejected.");
+        return;
+      }
+
+      if (!ui.formDept.value) {
+        showToast("Please select your Department.");
+        return;
+      }
+
+      if (!ui.formSec.value) {
+        showToast("Please select your Section.");
+        return;
+      }
+
+      if (!ui.formDate.value) {
+        showToast("Please select the class date.");
+        return;
+      }
+
+      if (!ui.formCourse.value) {
+        showToast("Please select your Course.");
         return;
       }
 
@@ -1679,7 +1854,6 @@
   function init() {
     injectHoneypot(ui.addForm);
     injectHoneypot(ui.reportForm);
-    updateModalDropdowns(state.dept, state.sec);
     syncDropdownStates();
     bindEvents();
     render();
